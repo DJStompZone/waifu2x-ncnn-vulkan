@@ -23,6 +23,28 @@ This package includes all the binaries and models required. It is portable, so n
 waifu2x-ncnn-vulkan.exe -i input.jpg -o output.png -n 2 -s 2
 ```
 
+### Drop Handlers (Currently only supported on Windows)
+Usage: Drop your image file(s) onto a batch file to effortlessly start a new upscale task
+  - By default, these assume your Waifu2x binary location to be **C:\Waifu\waifu2x-ncnn-vulkan.exe**
+  - By default, only two examples are included: `Quick Waifu2x.bat` and `Quick Waifu4x.bat`
+  - The scaling factor can be changed to any valid option by editing the first line of the `.bat` file
+  - Copy and paste 1 or more of the `.bat` files into the directory that contains pictures you want to upscale
+  - Simply drag-and-drop a picture onto the `.bat` file, it will be automatically upscaled according to the `scalefactor` on line 1
+  - Once the inference is complete, the following actions will be taken:
+    - The new file will be saved in the same directory as the input file with `_wNx` (N = scaling factor) appended to the filename 
+    - The result image will be automatically opened for previewing in MS Paint
+    - A message will display to confirm successful execution
+
+#### ToDo
+  - Additional customizations for Noise Level, Tile Size, Output Path, etc
+  - Option to toggle final triggers (mspaint, message box, 'ding' sound) on/off
+  - Add optional shortcut to include in "send to" context menu
+
+#### ToMaybeDoAtSomePoint
+  - Simple GUI to easily generate custom batch file
+  - Support for ZIP and other archive formats
+  - ~~Think of more fancy-sounding ideas for `readme.md`~~
+
 ### Full Usages
 
 ```console
@@ -86,6 +108,29 @@ cd build
 cmake ../src
 cmake --build . -j 4
 ```
+
+### Custom Drop Handlers
+
+You can add your own custom drag-and-drop functionality by writing your own batch file from scratch, or by editing the following to suit your needs:
+
+  #### "Quick Waifu2x.bat"
+  ```cmd
+  set scalefactor=2
+
+  @echo off && cls
+  set sf=%scalefactor%
+  echo Starting Waifu (%sf%x), please wait...
+  set arg1=%1
+  set arg2="%CD%\%~n1_w%sf%x%~x1"
+  cd %CD%
+  C:\Waifu\waifu2x-ncnn-vulkan.exe -i %arg1% -o %arg2% -s %sf% -t 400 -v
+  cls && start mspaint "%~n1_w%sf%x%~x1"
+  set mbox="Add-Type -AssemblyName PresentationFramework;"
+  PowerShell -Command "%mbox%[System.Windows.MessageBox]::Show('Saved to file %arg2%')"
+  ```
+  Notes:
+  - If you do not wish to recieve an alert upon completion, delete the last two lines
+  - You can delete the 3rd line from the bottom or change `mspaint` to point to your editor/viewer of choice
 
 ## Speed Comparison with waifu2x-caffe-cui
 
